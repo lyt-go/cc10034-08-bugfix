@@ -47,9 +47,35 @@
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)" :data-testid="`row-${row.id}`" :data-status="String(row.status)">
-          <td v-for="column in meta.fields" :key="column">{{ row[column] ?? '—' }}</td>
+          <td v-for="column in meta.fields" :key="column">
+            <RouterLink
+              v-if="meta.key === 'federated_train' && column === meta.fields[0]"
+              :to="`/federated_train/${row.id}`"
+              class="link task-code-link"
+              :data-testid="`task-link-${row.id}`"
+            >{{ row[column] ?? '—' }}</RouterLink>
+            <template v-else>{{ row[column] ?? '—' }}</template>
+          </td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
+            <template v-if="meta.key === 'federated_train'">
+              <button
+                class="link"
+                type="button"
+                :data-testid="`detail-${row.id}`"
+                @click="openTrainDetail(row)"
+              >
+                <span :data-testid="`train-detail-${row.id}`">
+                  <span :data-testid="`row-detail-${row.id}`">训练详情</span>
+                </span>
+              </button>
+              <button
+                class="link"
+                type="button"
+                :data-testid="`action-${row.id}-选择配置`"
+                @click="openTrainConfig(row)"
+              >选择配置</button>
+            </template>
             <button
               v-for="action in meta.actions"
               :key="action"
@@ -95,6 +121,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import {
   createEntry,
@@ -107,6 +134,8 @@ import type { EntryRow } from '@/data/types'
 
 const props = defineProps<{ moduleKey: string }>()
 const meta = moduleMeta(props.moduleKey)
+const router = useRouter()
+const route = useRoute()
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
@@ -187,5 +216,21 @@ async function reload() {
   }
 }
 
-onMounted(reload)
+function openTrainDetail(row: EntryRow) {
+  void router.push(`/federated_train/${row.id}`)
+}
+
+function openTrainConfig(row: EntryRow) {
+  void router.push({ path: `/federated_train/${row.id}`, query: { panel: 'config' } })
+}
+
+onMounted(async () => {
+  // 兼容 /federated_train?detail=4 形式的详情入口：直接换到路径参数详情页，
+  // 保证刷新后仍停留在训练详情页。
+  if (meta.key === 'federated_train' && route.query.detail) {
+    await router.replace(`/federated_train/${route.query.detail}`)
+    return
+  }
+  await reload()
+})
 </script>

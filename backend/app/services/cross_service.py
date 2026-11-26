@@ -147,17 +147,23 @@ def classify_tags_for_deploy(deploy_policy_id: int) -> list[dict[str, Any]]:
     return results
 
 
-def gradient_config_for_federated(federated_train_id: int) -> list[dict[str, Any]]:
-    """给定联邦训练任务，返回关联的梯度加密配置。"""
-    row = store.find("federated_train", federated_train_id)
-    if not row:
+def gradient_config_for_federated(
+    federated_train_id: int, round_no: int | str | None = None
+) -> list[dict[str, Any]]:
+    """给定联邦训练任务（可选指定轮次），返回该轮次可入选的梯度加密配置。
+
+    只返回「关联任务」指向本训练任务且当前状态为「已启用」的配置：
+    别的训练任务的配置、待验证 / 草稿 / 已停用版本都不能作为候选
+    （与训练页配置选择面板、节点回报资格核对使用同一份规则）。
+    ``round_no`` 仅用于与轮次调用方保持签名兼容；候选集合按任务过滤，
+    轮次入选单本身由 round_board 维护。
+    """
+    from app.services.round_board import eligible_configs, resolve_task
+
+    task = resolve_task(federated_train_id)
+    if task is None:
         return []
-    configs = store.rows("gradient_encrypt")
-    results: list[dict[str, Any]] = []
-    for c in configs:
-        if c.get("status") in ("已启用", "待验证"):
-            results.append(c)
-    return results
+    return eligible_configs(task)
 
 
 # ——————————— 汇总快照 ———————————

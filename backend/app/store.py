@@ -10,13 +10,17 @@ from app.seed import SEED_ROWS
 
 
 class Store:
+    # 轮次 / 入选单 / 节点回报是联邦训练内部子资源，不作为第 19~21 个业务模块
+    # 出现在运营概览与健康检查的模块计数里；通用资源接口仍可直接访问这些表。
+    INTERNAL_TABLES = {"train_round", "round_selection", "node_report"}
+
     def __init__(self) -> None:
         self._tables: dict[str, list[dict[str, Any]]] = {
             name: [dict(row) for row in rows] for name, rows in SEED_ROWS.items()
         }
 
     def module_names(self) -> list[str]:
-        return sorted(self._tables)
+        return sorted(name for name in self._tables if name not in self.INTERNAL_TABLES)
 
     def rows(self, module: str) -> list[dict[str, Any]]:
         return self._tables.setdefault(module, [])

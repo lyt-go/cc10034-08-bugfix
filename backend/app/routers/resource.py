@@ -91,8 +91,16 @@ def create_entry(module: str, payload: EntryPayload) -> ActionResult:
     return ActionResult(ok=True, message=f"{service.ENTITY}已登记", entry=entry)
 
 
-@router.post("/{module}/{entry_id}/actions", response_model=ActionResult)
+@router.post("/{module}/{entry_id}/actions")
 def run_action(module: str, entry_id: int, payload: ActionPayload) -> ActionResult:
     service = require_service(module)
-    entry, message = service.run_action(entry_id, payload.action.strip())
-    return ActionResult(ok=entry is not None, message=message, entry=entry)
+    extra_payload = payload.model_dump()
+    extra_payload["remark"] = payload.remark
+    entry, message = service.run_action(entry_id, payload.action.strip(), extra_payload)
+    result_extra: dict[str, Any] = {}
+    if isinstance(entry, dict) and "__result_extra__" in entry:
+        marker = entry.pop("__result_extra__")
+        if isinstance(marker, dict):
+            result_extra = marker
+    result = ActionResult(ok=entry is not None, message=message, entry=entry, **result_extra)
+    return result

@@ -11,6 +11,9 @@ from app.services.grant_approval import GrantApprovalService
 from app.services.classify_tag import ClassifyTagService
 from app.services.federated_train import FederatedTrainService
 from app.services.gradient_encrypt import GradientEncryptService
+from app.services.training_records import (
+    TrainRoundService, RoundSelectionService, NodeReportService,
+)
 from app.services.pseudonym import PseudonymService
 from app.services.k_anonymity import KAnonymityService
 from app.services.differential_sql import DifferentialSqlService
@@ -40,6 +43,10 @@ SERVICES: dict[str, BaseModuleService] = {
     "risk_scan": RiskScanService(),
     "deploy_policy": DeployPolicyService(),
     "anomaly_detect": AnomalyDetectService(),
+    # cc10034 轮次资格三张记录表
+    "train_round": TrainRoundService(),
+    "round_selection": RoundSelectionService(),
+    "node_report": NodeReportService(),
 }
 
 

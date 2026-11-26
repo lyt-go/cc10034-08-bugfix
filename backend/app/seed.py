@@ -405,11 +405,37 @@ SEED_ROWS: dict[str, list[dict[str, Any]]] = {
             "开始时间": "2026-09-28",
             "训练状态": "已收敛"
         },
+        {
+            "id": 4,
+            "status": "训练中",
+            "pending": True,
+            "abnormal": False,
+            "任务编号": "训练甲",
+            "任务代号": "FEDE-JIA",
+            "参与节点": "A, B",
+            "模型类型": "纵向XGBoost",
+            "聚合算法": "SecureBoost",
+            "全局轮次": "3",
+            "全局准确率": "0.901",
+            "开始时间": "2026-11-20",
+            "训练状态": "第2轮配置待确认"
+        },
+        {
+            "id": 5,
+            "status": "训练中",
+            "pending": True,
+            "abnormal": False,
+            "任务编号": "训练乙",
+            "任务代号": "FEDE-YI",
+            "参与节点": "C, D",
+            "模型类型": "逻辑回归",
+            "聚合算法": "FedAvg",
+            "全局轮次": "2",
+            "全局准确率": "0.887",
+            "开始时间": "2026-11-21",
+            "训练状态": "第2轮接收回报中"
+        },
     ],
-
-    # ========================================
-    # 9. 梯度加密 —— 联邦学习梯度保护
-    # ========================================
     "gradient_encrypt": [
         {
             "id": 1,
@@ -453,11 +479,177 @@ SEED_ROWS: dict[str, list[dict[str, Any]]] = {
             "关联任务": "FEDE-0003",
             "配置状态": "已上线稳定运行"
         },
+        # —— cc10034 轮次资格场景：训练甲/训练乙与可停用版本 ——
+        {
+            "id": 4,
+            "status": "已启用",
+            "pending": False,
+            "abnormal": False,
+            "配置编号": "GRAD-JIA-R2",
+            "加密方案": "CKKS全同态",
+            "密钥长度": "8192",
+            "同态层级": "多层同态",
+            "计算开销": "高(ms/op)",
+            "通信开销": "大(膨胀10x+)",
+            "关联任务": "训练甲",
+            "配置状态": "训练甲第2轮入选版本",
+            "配置版本": "r2-v1"
+        },
+        {
+            "id": 5,
+            "status": "待验证",
+            "pending": True,
+            "abnormal": True,
+            "配置编号": "GRAD-JIA-NEW",
+            "加密方案": "Paillier同态加密",
+            "密钥长度": "4096",
+            "同态层级": "部分同态",
+            "计算开销": "高(ms/op)",
+            "通信开销": "中(膨胀2x)",
+            "关联任务": "训练甲",
+            "配置状态": "性能压力测试中",
+            "配置版本": "r2-v2-rc"
+        },
+        {
+            "id": 6,
+            "status": "已启用",
+            "pending": False,
+            "abnormal": False,
+            "配置编号": "GRAD-YI-R2",
+            "加密方案": "差分隐私+SIGMA",
+            "密钥长度": "256",
+            "同态层级": "无",
+            "计算开销": "低(μs/op)",
+            "通信开销": "小(膨胀1x)",
+            "关联任务": "训练乙",
+            "配置状态": "训练乙第2轮入选版本",
+            "配置版本": "yi-r2-v1"
+        },
+        {
+            "id": 7,
+            "status": "已停用",
+            "pending": False,
+            "abnormal": True,
+            "配置编号": "GRAD-JIA-R1",
+            "加密方案": "Paillier同态加密",
+            "密钥长度": "2048",
+            "同态层级": "部分同态",
+            "计算开销": "中(ms/op)",
+            "通信开销": "中(膨胀2x)",
+            "关联任务": "训练甲",
+            "配置状态": "第1轮结束后停用归档",
+            "配置版本": "r1-v1"
+        },
     ],
 
     # ========================================
-    # 10. 假名化 —— 个人标识假名化映射
+    # 联邦训练轮次 / 轮次入选单 / 节点回报（cc10034）
     # ========================================
+    "train_round": [
+        {
+            "id": 1,
+            "task_id": 4,
+            "task_code": "训练甲",
+            "round_no": 1,
+            "轮次": "第1轮",
+            "status": "已关闭",
+            "pending": False,
+            "abnormal": False,
+            "confirmed_at": "2026-11-18 10:00:00",
+            "closed_at": "2026-11-19 18:00:00",
+            "note": "第1轮已关闭，已接受版本依据保留"
+        },
+        {
+            "id": 2,
+            "task_id": 4,
+            "task_code": "训练甲",
+            "round_no": 2,
+            "轮次": "第2轮",
+            "status": "待确认",
+            "pending": True,
+            "abnormal": False,
+            "confirmed_at": "",
+            "closed_at": "",
+            "note": ""
+        },
+        {
+            "id": 3,
+            "task_id": 5,
+            "task_code": "训练乙",
+            "round_no": 2,
+            "轮次": "第2轮",
+            "status": "接收中",
+            "pending": True,
+            "abnormal": False,
+            "confirmed_at": "2026-11-21 09:00:00",
+            "closed_at": "",
+            "note": ""
+        },
+    ],
+    "round_selection": [
+        {
+            "id": 1,
+            "round_id": 1,
+            "task_id": 4,
+            "round_no": 1,
+            "config_id": 7,
+            "配置编号": "GRAD-JIA-R1",
+            "配置版本": "r1-v1",
+            "加密方案": "Paillier同态加密",
+            "密钥长度": "2048",
+            "selected_status": "已启用",
+            "source": "轮次确认",
+            "created_at": "2026-11-18 10:00:00"
+        },
+        {
+            "id": 2,
+            "round_id": 2,
+            "task_id": 4,
+            "round_no": 2,
+            "config_id": 4,
+            "配置编号": "GRAD-JIA-R2",
+            "配置版本": "r2-v1",
+            "加密方案": "CKKS全同态",
+            "密钥长度": "8192",
+            "selected_status": "已启用",
+            "source": "预选配置",
+            "created_at": "2026-11-20 15:00:00"
+        },
+        {
+            "id": 3,
+            "round_id": 3,
+            "task_id": 5,
+            "round_no": 2,
+            "config_id": 6,
+            "配置编号": "GRAD-YI-R2",
+            "配置版本": "yi-r2-v1",
+            "加密方案": "差分隐私+SIGMA",
+            "密钥长度": "256",
+            "selected_status": "已启用",
+            "source": "轮次确认",
+            "created_at": "2026-11-21 09:00:00"
+        },
+    ],
+    "node_report": [
+        {
+            "id": 1,
+            "round_id": 1,
+            "task_id": 4,
+            "round_no": 1,
+            "node": "A",
+            "node_key": "a",
+            "config_id": 7,
+            "配置编号": "GRAD-JIA-R1",
+            "配置版本": "r1-v1",
+            "status": "已接受",
+            "qualified": True,
+            "accepted": True,
+            "reason": "",
+            "basis": "接受时快照：GRAD-JIA-R1 / r1-v1 / Paillier同态加密 / 2048 / 状态已启用",
+            "created_at": "2026-11-18 11:20:00",
+            "decided_at": "2026-11-18 11:25:00"
+        },
+    ],
     "pseudonym": [
         {
             "id": 1,
